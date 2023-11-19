@@ -34,11 +34,32 @@ output_clustalo = f'{Species_name}_clustalo.fasta'
 subprocess.call(f'clustalo -i {output} --full -o {output_clustalo} --threads=64',shell=True)
 print("\nClustalo analysing finished\nAnd the output file from clustalo has been saved as " + f'{output_clustalo}')
 
+#guide tree creation
+guide_tree = input("\nDo you want build a guide tree for your data processed by clustalo?\nThe multiple substitution correction method used here is Kimura\nAnd Neighbor-joining is used for guide tree creation\n[Y/N]")
+if guide_tree.upper() in ('Y', 'YES'):
+	tree_matrix = f'{Species_name}_matrix.ph'
+	subprocess.call(f'distmat -sequence {output_clustalo} -protmethod 2 -outfile {tree_matrix}',shell=True)
+	tree_output = f'{Species_name}_tree.nj'
+	subprocess.call(f'neighbor < {tree_matrix} > {tree_output}',shell=True)
+	print("\nGuide tree creation completed\nThe results have been saved as " + tree_matrix + " and " + tree_output)
+	print("\nYour result may need FigTree for visible reading\nAnd this program is NOT provided here")
+elif guide_tree.upper() in ('N', 'NO'):
+	print("\nOK, give up guide tree creating\n")
+else:
+	print("\nBecause of the invalid option input, guide tree creation abandoned automatically\n")
+
 #after clustalo analyse, use the output file of clustalo to build taxonomic group. and here I used plotcon from EMBOSS
 print("\nNow, starting taxonomic group buidling\nNow, using plotcon to build taxonomic group\n")
 print("\nPlease choose 1-4 for the number of columns to average alignment quality\nThe larger this input number is, the smoother the plot will be\n")
 subprocess.call(f'plotcon -sequences {output_clustalo} -graph png',shell=True)
+cwd = os.getcwd()
+plot_graph = os.listdir(cwd)
 print("\nOK, taxonomic group building completed\n")
+for png_graph in plot_graph:
+	if png_graph.endswith(".png"):
+		os.rename(png_graph, f'{Species_name}.png')
+print("\nThis is your PNG photo of plotcon result\nPlease click CLOSE after reading the photo for further motif scanning\n")
+subprocess.call(f'display {Species_name}.png',shell=True)
 
 #then scan the data for motif information
 print("\nNow, starting MOTIF scanning\n")
@@ -63,7 +84,6 @@ print("\nfasta dictionary created\n")
 
 motif_output_filename = Species_name + '_motif_ana' + '.txt'
 motif_output = open(motif_output_filename,'w')
-cwd = os.getcwd()
 file_count = 0 #set count number for break the loop
 for motif_key_input in motif_input.keys(): #the downloaded data have been split into a dictionary
 	motif_output.write(f'{motif_key_input}') #creat a file for store the output from patmatmotifs
