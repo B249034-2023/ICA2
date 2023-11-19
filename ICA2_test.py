@@ -13,8 +13,8 @@ Species_name = input("\nPlease enter the name of SPECIES you want to process\n")
 print("\nOK, thank you\n")
 
 #use the information defined by user to download relevant data
-species = str(Species_name.upper()) + "[organism]"
-protein = str(Prot_name.upper())
+species = str(Species_name.upper()) + "[Organism]"
+protein = str(Prot_name.upper()) + "[Protein Name]"
 user_query = f'{species} AND {protein}'
 print("\nNow, downloading the data of " + species + protein)
 output = f'{Species_name}.fasta'
